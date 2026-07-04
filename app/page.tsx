@@ -95,60 +95,33 @@ export default function Home() {
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-2xl shadow-black/30 backdrop-blur">
           <div className="grid gap-3 md:grid-cols-3">
             <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4">
-              <input
-                type="checkbox"
-                checked={options.anti2}
-                onChange={() => toggle("anti2")}
-                className="h-4 w-4 accent-white"
-              />
+              <input type="checkbox" checked={options.anti2} onChange={() => toggle("anti2")} className="h-4 w-4 accent-white" />
               <span className="text-sm font-medium">anti 2</span>
             </label>
 
             <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4">
-              <input
-                type="checkbox"
-                checked={options.anti3}
-                onChange={() => toggle("anti3")}
-                className="h-4 w-4 accent-white"
-              />
+              <input type="checkbox" checked={options.anti3} onChange={() => toggle("anti3")} className="h-4 w-4 accent-white" />
               <span className="text-sm font-medium">anti 3</span>
             </label>
 
             <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4">
-              <input
-                type="checkbox"
-                checked={options.cwl}
-                onChange={() => toggle("cwl")}
-                className="h-4 w-4 accent-white"
-              />
+              <input type="checkbox" checked={options.cwl} onChange={() => toggle("cwl")} className="h-4 w-4 accent-white" />
               <span className="text-sm font-medium">cwl / esl</span>
             </label>
 
             <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4">
-              <input
-                type="checkbox"
-                checked={options.esl}
-                onChange={() => toggle("esl")}
-                className="h-4 w-4 accent-white"
-              />
+              <input type="checkbox" checked={options.esl} onChange={() => toggle("esl")} className="h-4 w-4 accent-white" />
               <span className="text-sm font-medium">esl</span>
             </label>
 
             <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4 md:col-span-2">
-              <input
-                type="checkbox"
-                checked={options.antiAll}
-                onChange={() => toggle("antiAll")}
-                className="h-4 w-4 accent-white"
-              />
+              <input type="checkbox" checked={options.antiAll} onChange={() => toggle("antiAll")} className="h-4 w-4 accent-white" />
               <span className="text-sm font-medium">anti all</span>
             </label>
           </div>
 
           <div className="mt-5">
-            <label className="mb-2 block text-sm text-zinc-300">
-              Additional comments
-            </label>
+            <label className="mb-2 block text-sm text-zinc-300">Additional comments</label>
             <textarea
               value={comments}
               onChange={(e) => setComments(e.target.value)}
@@ -165,4 +138,34 @@ export default function Home() {
             {loading ? "Generating..." : "Generate TH18 layout"}
           </button>
 
-          <p className="
+          <p className="mt-4 text-sm text-zinc-500">
+            {promptPreview ? `Current prompt: ${promptPreview}` : "Select options above to build your prompt."}
+          </p>
+
+          {result && (
+            <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+              <p className="text-sm text-zinc-400">{result.baseType}</p>
+              <h2 className="mt-1 text-2xl font-semibold text-white">{result.style}</h2>
+              <div className="mt-4 space-y-2 text-sm text-zinc-300">
+                <p><span className="text-zinc-400">Core:</span> {result.placement.core}</p>
+                <p><span className="text-zinc-400">Inner ring:</span> {result.placement.innerRing}</p>
+                <p><span className="text-zinc-400">Outer ring:</span> {result.placement.outerRing}</p>
+                <p><span className="text-zinc-400">Traps:</span> {result.placement.traps}</p>
+                <p><span className="text-zinc-400">Note:</span> {result.placement.note}</p>
+              </div>
+
+              <a
+                href={result.layoutLink}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-flex rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black"
+              >
+                Open layout link
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}
