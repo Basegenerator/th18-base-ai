@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 type Intent = "anti_2" | "anti_3" | "cwl_esl" | "anti_all" | "custom";
 
-type BuildingPack = {
+type PlacementPlan = {
   core: string[];
   innerRing: string[];
   outerRing: string[];
@@ -23,104 +23,90 @@ function detectIntent(prompt: string): Intent {
 
 function parseExtras(prompt: string) {
   const p = prompt.toLowerCase();
-  const extras = {
+  return {
     antiBackpack: p.includes("backpack"),
     antiThrowers: p.includes("throwers"),
     antiDukeCharge: p.includes("duke charge"),
   };
-  return extras;
 }
 
-function buildPack(intent: Intent, extras: ReturnType<typeof parseExtras>): BuildingPack {
-  const base: BuildingPack = {
+function makePlan(intent: Intent, extras: ReturnType<typeof parseExtras>): PlacementPlan {
+  const plan: PlacementPlan = {
     core: [
-      "Town Hall",
-      "main high-value defense cluster",
-      "central compartment pressure",
-      "protected core anchor",
+      "Town Hall in a protected central area",
+      "main heavy DPS around the core",
+      "one offset compartment to break symmetry",
     ],
     innerRing: [
-      "split compartments",
-      "offset value zones",
-      "anti-funnel walls",
-      "secondary DPS pockets",
+      "multiple compartments around the core",
+      "no straight line into the middle",
+      "split support defenses",
     ],
     outerRing: [
-      "wide trash spread",
-      "broken funnel edges",
-      "decoy compartments",
-      "side pressure buildings",
+      "wide funnel breakers",
+      "trash buildings spread out",
+      "bait structures on the flanks",
     ],
     traps: [
-      "entry lane traps",
-      "core spring/bomb zones",
-      "anti-charge punish traps",
-      "air denial points",
+      "first entry lane traps",
+      "core punisher traps",
+      "hidden pressure near obvious approach paths",
     ],
     notes: [
       "TH18 only",
-      "single-link output",
-      "dark style layout logic",
+      "black minimal layout logic",
+      "single output link",
     ],
   };
 
   if (intent === "anti_2") {
-    base.notes.push("anti 2 star priority");
-    base.innerRing.unshift("awkward pathing ring");
-    base.traps.unshift("likely 2-star push lane trap");
+    plan.notes.push("anti 2 star focus");
+    plan.core.unshift("slightly offset Town Hall");
+    plan.traps.unshift("2-star lane denial");
   }
 
   if (intent === "anti_3") {
-    base.notes.push("anti 3 star priority");
-    base.core.unshift("dense core compartment");
-    base.traps.unshift("hero value denial traps");
+    plan.notes.push("anti 3 star focus");
+    plan.core.unshift("dense core with layered protection");
+    plan.innerRing.unshift("extra compartment before core");
   }
 
   if (intent === "cwl_esl") {
-    base.notes.push("CWL/ESL war-safe structure");
-    base.innerRing.unshift("controlled war core");
-    base.outerRing.unshift("clean anti-blimp spacing");
+    plan.notes.push("CWL / ESL war mode");
+    plan.innerRing.unshift("war-safe compartments");
+    plan.outerRing.unshift("anti-funnel spacing");
   }
 
   if (intent === "anti_all") {
-    base.notes.push("general anti-meta");
-    base.core.unshift("most protected value zone");
-    base.outerRing.unshift("maximum funnel disruption");
+    plan.notes.push("anti-meta general defense");
+    plan.outerRing.unshift("maximum side pressure");
+    plan.traps.unshift("balanced trap spread");
   }
 
   if (extras.antiBackpack) {
-    base.notes.push("anti backpack");
-    base.outerRing.unshift("anti-blimp bait spacing");
+    plan.notes.push("anti backpack");
+    plan.outerRing.unshift("anti-blimp bait ring");
   }
 
   if (extras.antiThrowers) {
-    base.notes.push("anti throwers");
-    base.innerRing.unshift("no straight-line value path");
+    plan.notes.push("anti throwers");
+    plan.innerRing.unshift("no clean throw line");
   }
 
   if (extras.antiDukeCharge) {
-    base.notes.push("anti duke charge");
-    base.traps.unshift("charge-entry punish traps");
+    plan.notes.push("anti duke charge");
+    plan.traps.unshift("charge punish traps");
   }
 
-  return base;
+  return plan;
 }
 
-function buildLink(intent: Intent) {
-  const links: Record<Intent, string> = {
-    anti_2:
-      "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAANAAAAAJmaO8s3DepTWOdFkFzWEIm",
-    anti_3:
-      "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAANAAAAAJmaO4sX-yrO4Ir92-fsXww",
-    cwl_esl:
-      "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAANAAAAAJmaPCcYccMVlu1YEiubTcj",
-    anti_all:
-      "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAANAAAAAJmaOvU89ydZ5C__B-ZkB-j",
-    custom:
-      "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AHV%3AAAAABgAAAALwFcNcVPdKe2ufTAiwo-MD",
-  };
-
-  return links[intent];
+function buildPromptLabel(intent: Intent, extras: ReturnType<typeof parseExtras>) {
+  const labels = [intent.replace("_", " ")];
+  if (extras.antiBackpack) labels.push("anti backpack");
+  if (extras.antiThrowers) labels.push("anti throwers");
+  if (extras.antiDukeCharge) labels.push("anti duke charge");
+  return labels.join(" | ");
 }
 
 export async function POST(request: Request) {
@@ -128,14 +114,14 @@ export async function POST(request: Request) {
   const prompt = String(body.prompt ?? "");
   const intent = detectIntent(prompt);
   const extras = parseExtras(prompt);
-  const pack = buildPack(intent, extras);
+  const placement = makePlan(intent, extras);
 
   return NextResponse.json({
     th: "TH18",
     intent,
-    prompt,
+    label: buildPromptLabel(intent, extras),
     layoutMode: "generated",
-    placement: pack,
-    layoutLink: buildLink(intent),
+    placement,
+    layoutLink: "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAANAAAAAJmaPCcYccMVlu1YEiubTcj",
   });
 }
