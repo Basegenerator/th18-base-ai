@@ -101,4 +101,71 @@ function buildPlan(intent: string): BasePlan {
       return {
         baseType: "ANTI BACKPACK",
         style: "Anti-blimp / anti-backpack base with bait and value denial.",
-        placement: 
+        placement: {
+          core: "Do not stack all important value on one obvious blimp target.",
+          innerRing: "Split high-value defenses across separate compartments.",
+          outerRing: "Use decoy structures to pull the attacker off the real value.",
+          traps: "Place air traps and damage traps where the blimp is most likely to land.",
+          note: "Good when the opponent likes airborne value delivery.",
+        },
+      };
+
+    case "anti_throwers":
+      return {
+        baseType: "ANTI THROWERS",
+        style: "Anti-thrower base with spread value and no easy long-range payoff.",
+        placement: {
+          core: "Core should be protected, but not in a simple square pattern.",
+          innerRing: "Spread key buildings so one throw line does not reach everything.",
+          outerRing: "Avoid lining up buildings in obvious straight value paths.",
+          traps: "Use traps on likely long-range approach angles and landing spots.",
+          note: "Strong against current meta armies that want easy target clusters.",
+        },
+      };
+
+    default:
+      return {
+        baseType: "TH18 DEFAULT",
+        style: "Balanced TH18 anti-meta layout for general defense.",
+        placement: {
+          core: "Town Hall and main DPS in a secure central zone.",
+          innerRing: "Uneven inner compartments to prevent clean pathing.",
+          outerRing: "Wide outer ring with spread buildings for anti-funnel.",
+          traps: "Traps on the most likely first entry lane.",
+          note: "Use this when the prompt is unclear.",
+        },
+      };
+  }
+}
+
+function makeLayoutLink(intent: string) {
+  const links: Record<string, string> = {
+    anti_all: "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAAFQAAAAK-sfFeSce3dOoB-P-_72SJ",
+    cwl_esl: "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAAFQAAAAK-sfe6i1GAg_KxHFJAVI-B",
+    anti_2: "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAAFQAAAAK-sf0WCb1_6UiFzywJmW9F",
+    anti_3: "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAAFQAAAAK-sgOM8hJA-lj4k7WoDFW6",
+    anti_duke_charge: "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAAFQAAAAK-sgj4v6k_BvMnzY8mj6EU",
+    anti_backpack: "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAAFQAAAAK-sg5pFueuw7FaX66fLjPb",
+    anti_throwers: "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AWB%3AAAAAFQAAAAK-sizGUpdC2TZ_zuQpWBig",
+    default: "https://link.clashofclans.com/en?action=OpenLayout&id=TH18%3AHV%3AAAAABgAAAALwFcNcVPdKe2ufTAiwo-MD",
+  };
+
+  return links[intent] ?? links.default;
+}
+
+export async function POST(request: Request) {
+  const body = await request.json().catch(() => ({}));
+  const prompt = String(body.prompt ?? "");
+  const intent = detectIntent(prompt);
+  const plan = buildPlan(intent);
+
+  return NextResponse.json({
+    th: "TH18",
+    prompt,
+    intent,
+    baseType: plan.baseType,
+    style: plan.style,
+    placement: plan.placement,
+    layoutLink: makeLayoutLink(intent),
+  });
+}
