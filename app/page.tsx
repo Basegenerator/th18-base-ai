@@ -25,6 +25,32 @@ type Options = {
   antiAll: boolean;
 };
 
+function Pill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        "rounded-full border px-5 py-3 text-sm font-medium transition-all duration-200",
+        "active:scale-[0.98]",
+        active
+          ? "border-zinc-200 bg-zinc-200 text-zinc-950 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
+          : "border-zinc-800 bg-zinc-900 text-zinc-100 hover:bg-zinc-800 hover:border-zinc-700",
+      ].join(" ")}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function Home() {
   const [options, setOptions] = useState<Options>({
     anti2: false,
@@ -80,7 +106,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[#111111] text-white">
+    <main className="min-h-screen bg-[#0b0b0b] text-white">
       <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col justify-center px-6 py-12">
         <div className="mb-8 text-center">
           <p className="mb-3 text-sm text-zinc-400">TH18 Base AI</p>
@@ -92,32 +118,13 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-2xl shadow-black/30 backdrop-blur">
-          <div className="grid gap-3 md:grid-cols-3">
-            <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4">
-              <input type="checkbox" checked={options.anti2} onChange={() => toggle("anti2")} className="h-4 w-4 accent-white" />
-              <span className="text-sm font-medium">anti 2</span>
-            </label>
-
-            <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4">
-              <input type="checkbox" checked={options.anti3} onChange={() => toggle("anti3")} className="h-4 w-4 accent-white" />
-              <span className="text-sm font-medium">anti 3</span>
-            </label>
-
-            <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4">
-              <input type="checkbox" checked={options.cwl} onChange={() => toggle("cwl")} className="h-4 w-4 accent-white" />
-              <span className="text-sm font-medium">cwl / esl</span>
-            </label>
-
-            <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4">
-              <input type="checkbox" checked={options.esl} onChange={() => toggle("esl")} className="h-4 w-4 accent-white" />
-              <span className="text-sm font-medium">esl</span>
-            </label>
-
-            <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4 md:col-span-2">
-              <input type="checkbox" checked={options.antiAll} onChange={() => toggle("antiAll")} className="h-4 w-4 accent-white" />
-              <span className="text-sm font-medium">anti all</span>
-            </label>
+        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-6 shadow-2xl shadow-black/30 backdrop-blur">
+          <div className="flex flex-wrap gap-3">
+            <Pill active={options.anti2} onClick={() => toggle("anti2")}>anti 2</Pill>
+            <Pill active={options.anti3} onClick={() => toggle("anti3")}>anti 3</Pill>
+            <Pill active={options.cwl} onClick={() => toggle("cwl")}>cwl</Pill>
+            <Pill active={options.esl} onClick={() => toggle("esl")}>esl</Pill>
+            <Pill active={options.antiAll} onClick={() => toggle("antiAll")}>anti all</Pill>
           </div>
 
           <div className="mt-5">
@@ -126,14 +133,14 @@ export default function Home() {
               value={comments}
               onChange={(e) => setComments(e.target.value)}
               placeholder="Skriv extra önskemål här, till exempel anti backpack, anti throwers, anti duke charge..."
-              className="min-h-40 w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-4 text-white outline-none placeholder:text-zinc-500 focus:border-zinc-600"
+              className="min-h-40 w-full rounded-3xl border border-zinc-800 bg-zinc-900 px-4 py-4 text-white outline-none placeholder:text-zinc-500 focus:border-zinc-600"
             />
           </div>
 
           <button
             onClick={generateBase}
             disabled={loading || (!options.anti2 && !options.anti3 && !options.cwl && !options.esl && !options.antiAll && !comments.trim())}
-            className="mt-5 w-full rounded-2xl bg-white px-4 py-4 text-sm font-semibold text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+            className="mt-5 w-full rounded-full bg-white px-4 py-4 text-sm font-semibold text-black transition hover:bg-zinc-200 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
           >
             {loading ? "Generating..." : "Generate TH18 layout"}
           </button>
@@ -143,7 +150,7 @@ export default function Home() {
           </p>
 
           {result && (
-            <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+            <div className="mt-6 rounded-3xl border border-zinc-800 bg-zinc-900/70 p-5">
               <p className="text-sm text-zinc-400">{result.baseType}</p>
               <h2 className="mt-1 text-2xl font-semibold text-white">{result.style}</h2>
               <div className="mt-4 space-y-2 text-sm text-zinc-300">
@@ -158,7 +165,7 @@ export default function Home() {
                 href={result.layoutLink}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-5 inline-flex rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black"
+                className="mt-5 inline-flex rounded-full bg-white px-4 py-3 text-sm font-semibold text-black"
               >
                 Open layout link
               </a>
